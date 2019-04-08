@@ -1,6 +1,28 @@
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
+teams = []
+
+class Team(object):
+	number = None
+	name = None
+	matches = []
+
+	# Averages
+	avg_cargo_score = 0.0
+	avg_hatch_score = 0.0
+	avg_drive_rating = 0.0
+	avg_defence_rating = 0.0
+	rocket_stats = {'cargo': {'low': 0.0, 'middle': 0.0, 'high': 0.0},
+					'hatch': {'low': 0.0, 'middle': 0.0, 'high': 0.0}}
+
+	start_level = None
+	end_level = None
+	has_been_highlighted = False
+	has_been_issued_warning = False
+
+	def __init__(self):
+		pass
 
 class Match(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
