@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>{{ title }} | CSP Analyze</title>
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='normalize.css') }}">
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='skeleton.css') }}">
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='base.css') }}">
+	</head>
+	<body>
+		<div class="navbar" id="main-navbar">
+			<a href="javascript:void(0);" class="icon" onClick="openDrawerMenu()">&#9776;</a>
+			<a href="{{ url_for('leaderboards') }}">Leaderboards</a>
+			<a href="{{ url_for('teams') }}">Teams</a>
+		</div>
+		<div class="container">
+		{% block content %}
+		{% endblock %}
+		</div>
+		<script src="{{ url_for('static', filename='base.js') }}"></script>
+	</body>
+</html>
