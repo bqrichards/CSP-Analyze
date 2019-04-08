@@ -1,7 +1,19 @@
 from flask_sqlalchemy import SQLAlchemy
+from collections import Counter
+import logging
+import sys
 
 db = SQLAlchemy()
-teams = []
+
+# Set up logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 class Team(object):
 	number = None
@@ -16,13 +28,121 @@ class Team(object):
 	rocket_stats = {'cargo': {'low': 0.0, 'middle': 0.0, 'high': 0.0},
 					'hatch': {'low': 0.0, 'middle': 0.0, 'high': 0.0}}
 
-	start_level = None
-	end_level = None
+	start_level = []
+	end_level = []
 	has_been_highlighted = False
 	has_been_issued_warning = False
 
-	def __init__(self):
-		pass
+	def __init__(self, tbaDictionary=None, from_file=False):
+		if tbaDictionary is not None:
+			# Unpack the dictionary into variables
+			self.key = tbaDictionary['key']
+			if from_file:
+				self.number = tbaDictionary['number']
+				self.name = tbaDictionary['name']
+			else:
+				self.number = tbaDictionary['team_number']
+				self.name = tbaDictionary['nickname']
+
+	''' Set variables to their default values '''
+	def clear(self):
+		self.matches = []
+		self.avg_cargo_score = 0.0
+		self.avg_hatch_score = 0.0
+		self.avg_drive_rating = 0.0
+		self.avg_defence_rating = 0.0
+		self.rocket_stats = {'cargo': {'low': 0.0, 'middle': 0.0, 'high': 0.0},
+					'hatch': {'low': 0.0, 'middle': 0.0, 'high': 0.0}}
+		self.start_level = []
+		self.end_level = []
+		self.has_been_highlighted = False
+		self.has_been_issued_warning = False
+	
+	def calculate_averages(self, rows):
+		self.clear()
+		
+		for row in rows:
+			self.start_level.append(row.auto_idStartLevel)
+			self.end_level.append(row.tele_idClimbLevel)
+			self.avg_drive_rating += row.comm_idDriveRating
+			self.avg_defence_rating += row.comm_idDefenseRating
+
+			if row.comm_flHighlight:
+				self.has_been_highlighted = True
+			if row.comm_flWarning:
+				self.has_been_issued_warning = True
+
+			# Cargo Score
+			self.avg_cargo_score += sum([
+				row.auto_numShipFrontCargoSuccess,
+				row.auto_numShipSideCargoSuccess,
+				row.auto_numRocketLowCargoSuccess,
+				row.auto_numRocketMidCargoSuccess,
+				row.auto_numRocketHighCargoSuccess,
+				row.tele_numShipFrontCargoSuccess,
+				row.tele_numShipSideCargoSuccess,
+				row.tele_numRocketLowCargoSuccess,
+				row.tele_numRocketMidCargoSuccess,
+				row.tele_numRocketHighCargoSuccess]
+			)
+
+			# Cargo Rocket L/M/H
+			self.rocket_stats['cargo']['low'] += sum([
+				row.auto_numRocketLowCargoSuccess, row.tele_numRocketLowCargoSuccess
+			])
+			self.rocket_stats['cargo']['middle'] += sum([
+				row.auto_numRocketMidCargoSuccess, row.tele_numRocketMidCargoSuccess
+			])
+			self.rocket_stats['cargo']['high'] += sum([
+				row.auto_numRocketHighCargoSuccess, row.tele_numRocketHighCargoSuccess
+			])
+
+			# Hatch Score
+			self.avg_hatch_score += sum([
+				row.auto_numShipFrontHatchSuccess,
+				row.auto_numShipSideHatchSuccess,
+				row.auto_numRocketLowHatchSuccess,
+				row.auto_numRocketMidHatchSuccess,
+				row.auto_numRocketHighHatchSuccess,
+				row.tele_numShipFrontHatchSuccess,
+				row.tele_numShipSideHatchSuccess,
+				row.tele_numRocketLowHatchSuccess,
+				row.tele_numRocketMidHatchSuccess,
+				row.tele_numRocketHighHatchSuccess]
+			)
+
+			# Hatch Rocket L/M/H
+			self.rocket_stats['hatch']['low'] += sum([
+				row.auto_numRocketLowHatchSuccess, row.tele_numRocketLowHatchSuccess
+			])
+			self.rocket_stats['hatch']['middle'] += sum([
+				row.auto_numRocketMidHatchSuccess, row.tele_numRocketMidHatchSuccess
+			])
+			self.rocket_stats['hatch']['high'] += sum([
+				row.auto_numRocketHighHatchSuccess, row.tele_numRocketHighHatchSuccess
+			])
+
+		# Divide averages by number of rows
+		self.cargo_rocket_lmh = '{}/{}/{}'.format(
+			self.rocket_stats['cargo']['low']/float(len(rows)),
+			self.rocket_stats['cargo']['middle']/float(len(rows)),
+			self.rocket_stats['cargo']['high']/float(len(rows))
+		)
+		self.hatch_rocket_lmh = '{}/{}/{}'.format(
+			self.rocket_stats['hatch']['low']/float(len(rows)),
+			self.rocket_stats['hatch']['middle']/float(len(rows)),
+			self.rocket_stats['hatch']['high']/float(len(rows))
+		)
+
+		self.avg_cargo_score /= float(len(rows))
+		self.avg_hatch_score /= float(len(rows))
+
+		self.avg_drive_rating /= float(len(rows))
+		self.avg_defence_rating /= float(len(rows))
+
+		# Start and end level
+		self.start_level = ', '.join(['{} {} times'.format(k, v) for (k, v) in Counter(self.start_level).items()])
+		self.end_level = ', '.join(['{} {} times'.format(k, v) for (k, v) in Counter(self.end_level).items()])
 
 class Match(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
