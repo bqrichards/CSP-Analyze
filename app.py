@@ -23,6 +23,5 @@ def leaderboards():
 def teams():
 	return render_template('teams.html', title='Teams')
 
-
 models.db.create_all(app=app)
 app.run(host='0.0.0.0')
