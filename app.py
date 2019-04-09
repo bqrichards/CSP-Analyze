@@ -22,6 +22,10 @@ def leaderboards():
 def teams():
 	return render_template('teams.html', title='Teams')
 
+@app.route('/team/<int:team_number>')
+def team(team_number):
+	return render_template('team.html', title="Team {}".format(team_number), team=cache.get_team_by_number(team_number))
+
 cache.models.db.create_all(app=app)
 cache.ask_for_team_at_event()
 cache.sort_teams()

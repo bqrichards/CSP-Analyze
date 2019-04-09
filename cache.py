@@ -23,6 +23,12 @@ event_code = '2019wila'
 tba_key = 'DzhuOimNqUcdpPEhDhFMoIFltbTNnIAner1f64b3aSSNrDTpZ1ZozPdN263iIV8L'
 last_asked = {'teams_at_event': None, 'official_rankings': None}
 
+def get_team_by_number(number):
+	for team in teams:
+		if team.number == number:
+			return team
+	return None
+
 def ask_for_team_at_event():
 	global teams
 	teams_filename = '{}-teams.json'.format(event_code)

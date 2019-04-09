@@ -60,6 +60,7 @@ class Team(object):
 	
 	def calculate_averages(self, rows):
 		self.clear()
+		self.matches = rows
 		
 		for row in rows:
 			self.start_level.append(row.auto_idStartLevel)
@@ -124,21 +125,21 @@ class Team(object):
 
 		# Divide averages by number of rows
 		self.cargo_rocket_lmh = '{}/{}/{}'.format(
-			self.rocket_stats['cargo']['low']/float(len(rows)),
-			self.rocket_stats['cargo']['middle']/float(len(rows)),
-			self.rocket_stats['cargo']['high']/float(len(rows))
+			round(self.rocket_stats['cargo']['low']/float(len(rows)), 2),
+			round(self.rocket_stats['cargo']['middle']/float(len(rows)), 2),
+			round(self.rocket_stats['cargo']['high']/float(len(rows)), 2)
 		)
 		self.hatch_rocket_lmh = '{}/{}/{}'.format(
-			self.rocket_stats['hatch']['low']/float(len(rows)),
-			self.rocket_stats['hatch']['middle']/float(len(rows)),
-			self.rocket_stats['hatch']['high']/float(len(rows))
+			round(self.rocket_stats['hatch']['low']/float(len(rows)), 2),
+			round(self.rocket_stats['hatch']['middle']/float(len(rows)), 2),
+			round(self.rocket_stats['hatch']['high']/float(len(rows)), 2)
 		)
 
-		self.avg_cargo_score /= float(len(rows))
-		self.avg_hatch_score /= float(len(rows))
+		self.avg_cargo_score = round(self.avg_cargo_score/float(len(rows)), 2)
+		self.avg_hatch_score = round(self.avg_hatch_score/float(len(rows)), 2)
 
-		self.avg_drive_rating /= float(len(rows))
-		self.avg_defence_rating /= float(len(rows))
+		self.avg_drive_rating = round(self.avg_drive_rating/float(len(rows)), 2)
+		self.avg_defence_rating = round(self.avg_defence_rating/float(len(rows)), 2)
 
 		# Start and end level
 		self.start_level = ', '.join(['{} {} times'.format(k, v) for (k, v) in Counter(self.start_level).items()])

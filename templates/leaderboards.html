@@ -9,7 +9,7 @@
 	<h1>Defence</h1>
 	<ol class="leaderboard">
 		{% for team_number in leaderboards['defence'] %}
-		<li>{{ team_number }}</li>
+		<a href="{{ url_for('team', team_number=team_number) }}"><li>{{ team_number }}</li></a>
 		{% endfor %}
 	</ol>
 </div>
@@ -18,7 +18,7 @@
 	<h1>Cargo</h1>
 	<ol class="leaderboard">
 		{% for team_number in leaderboards['cargo'] %}
-		<li>{{ team_number }}</li>
+		<a href="{{ url_for('team', team_number=team_number) }}"><li>{{ team_number }}</li></a>
 		{% endfor %}
 	</ol>
 </div>
@@ -27,7 +27,7 @@
 	<h1>Hatch</h1>
 	<ol class="leaderboard">
 		{% for team_number in leaderboards['hatch'] %}
-		<li>{{ team_number }}</li>
+		<a href="{{ url_for('team', team_number=team_number) }}"><li>{{ team_number }}</li></a>
 		{% endfor %}
 	</ol>
 </div>

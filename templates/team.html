@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/team.css') }}">
+{% endblock %}
+
+{% block content %}
+<div id="top-container">
+	<div id="team-info-panel">
+		<p>Team #{{ team.number }}</p>
+		<p>{{ team.name }}</p>
+		{% if team.rank %}
+		<p>Currently ranked: {{ team.rank }}</p>
+		{% else %}
+		<p>Currently ranked: Unknown</p>
+		{% endif %}
+		{% if team.has_been_highlighted %}
+		<p>✓ Has been highlighted </p>
+		{% endif %}
+		{% if team.has_been_issued_warning %}
+		<p>✗ Scout issued warning against this team</p>
+		{% endif %}
+		<p>Average Drive Rating: {{ team.avg_drive_rating }}</p>
+		<p>Average Defense Rating: {{ team.avg_defence_rating }}</p>
+	</div>
+	<div id="summary-info-panel">
+		<h4>Performance Summary</h4>
+		<h4>Sandstorm</h4>
+		<p>Start Level: {{ team.start_level }}</p>
+		
+		<h4>Cargo</h4>
+		<p>Avg. Cargo Score: {{ team.avg_cargo_score }}</p>
+		<p>Avg. Rocket L/M/H: {{ team.cargo_rocket_lmh }}</p>
+
+		<h4>Hatch</h4>
+		<p>Avg. Hatch Score: {{ team.avg_hatch_score }}</p>
+		<p>Avg. Rocket L/M/H: {{ team.hatch_rocket_lmh }}</p>
+
+		<h4>End Game</h4>
+		<p>End Level: {{ team.end_level }}</p>
+	</div>
+</div>
+<div id="bottom-container">
+	<h4>Indiviual Matches</h4>
+	<table>
+		<tr>
+			<th>Match #</th>
+			<th>Highlighted</th>
+			<th>Warning</th>
+			<th>Comments</th>
+			<th>Yellow/Red Card/Crashed</th>
+			<th>Start Level</th>
+			<th>Start Object</th>
+			<th>Crossed Midline</th>
+			<th>Cargoship Front/Side Cargo</th>
+			<th>Cargoship Front/Side Hatch</th>
+			<th>Rocket Low Cargo</th>
+			<th>Rocket Middle Cargo</th>
+			<th>Rocket High Cargo</th>
+			<th>Rocket Low Hatch</th>
+			<th>Rocket Middle Hatch</th>
+			<th>Rocket High Hatch</th>
+			<th>Climb Level</th>
+			<th>Was assisted?</th>
+			<th>Worked with alliance</th>
+		</tr>
+		{% for match in team.matches %}
+		<tr>
+			<td>{{ match.match }}</td>
+			<td>{{ match.comm_flHighlight }}</td>
+			<td>{{ match.comm_flWarning }}</td>
+			<td>{{ match.comm_txNotes }}</td>
+			<td>{{ match.yellow }}/{{ match.red }}/{{ match.crashed }}</td>
+			<td>{{ match.auto_idStartLevel }}</td>
+			{% if match.auto_idStartObject == 0 or match.auto_idStartObject == 1 %}
+			<td>None</td>
+			{% elif match.auto_idStartObject == 2 %}
+			<td>Hatch</td>
+			{% elif match.auto_idStartObject == 3 %}
+			<td>Cargo</td>
+			{% else %}
+			<td>Error</td>
+			{% endif %}
+			<td>{{ match.auto_flCrossOver }}</td>
+			<td>{{ match.auto_numShipFrontCargoSuccess + match.tele_numShipFrontCargoSuccess }}/{{ match.auto_numShipSideCargoSuccess + match.tele_numShipSideCargoSuccess }}</th>
+			<td>{{ match.auto_numShipFrontHatchSuccess + match.tele_numShipFrontHatchSuccess }}/{{ match.auto_numShipSideHatchSuccess + match.tele_numShipSideHatchSuccess }}</th>
+			<td>{{ match.auto_numRocketLowCargoSuccess + match.tele_numRocketLowCargoSuccess }}</td>
+			<td>{{ match.auto_numRocketMidCargoSuccess + match.tele_numRocketMidCargoSuccess }}</td>
+			<td>{{ match.auto_numRocketHighCargoSuccess + match.tele_numRocketHighCargoSuccess }}</td>
+			<td>{{ match.auto_numRocketLowHatchSuccess + match.tele_numRocketLowHatchSuccess }}</td>
+			<td>{{ match.auto_numRocketMidHatchSuccess + match.tele_numRocketMidHatchSuccess }}</td>
+			<td>{{ match.auto_numRocketHighHatchSuccess + match.tele_numRocketHighHatchSuccess }}</td>
+			<td>{{ match.tele_idClimbLevel }}</td>
+			<td>{{ match.tele_climbAssisted }}</td>
+			<td>{{ match.comm_flAlliance }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+</div>
+{% endblock %}

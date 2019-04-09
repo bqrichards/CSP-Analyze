@@ -1,0 +1,24 @@
+#bottom-container {
+	background-color: lightgray;
+	overflow-x: scroll;
+	padding: 10px;
+}
+
+table {
+	padding-bottom: 20px;
+}
+
+th, td {
+	min-width: 100px;
+	text-align: center;
+}
+
+#team-info-panel {
+	background-color: yellow;
+	padding: 10px;
+}
+
+#summary-info-panel {
+	background-color: lightgreen;
+	padding: 10px;
+}

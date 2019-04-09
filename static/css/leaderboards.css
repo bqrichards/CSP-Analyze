@@ -3,3 +3,8 @@
 	float: left;
 	text-align: center;
 }
+
+.leaderboard a {
+	color: black;
+	text-decoration: none;
+}
