@@ -3,6 +3,7 @@ import logging
 import sys
 import models
 import json
+from time import sleep
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -18,6 +19,7 @@ teams = []
 defence_sorted = []
 cargo_sorted = []
 hatch_sorted = []
+rankings_sorted = []
 
 event_code = '2019wila'
 tba_key = 'DzhuOimNqUcdpPEhDhFMoIFltbTNnIAner1f64b3aSSNrDTpZ1ZozPdN263iIV8L'
@@ -29,11 +31,11 @@ def get_team_by_number(number):
 			return team
 	return None
 
-def ask_for_team_at_event():
+def ask_for_teams_at_event():
 	global teams
 	teams_filename = '{}-teams.json'.format(event_code)
 
-	# TODO - check if local list of teams at event already exists
+	# Check if list of teams already exists
 	try:
 		with open(teams_filename, 'r') as f:
 			teams_from_file = json.loads(f.read())
@@ -79,6 +81,8 @@ def ask_for_official_rankings():
 	if len(teams) == 0:
 		logger.info('Aborting official rankings, we have no local team instances')
 		return
+	
+	global rankings_sorted
 
 	endpoint = 'https://www.thebluealliance.com/api/v3/event/{}/rankings'.format(event_code)
 	headers = {'X-TBA-Auth-Key': tba_key}
@@ -102,8 +106,11 @@ def ask_for_official_rankings():
 		logger.info('No rankings yet')
 		return
 	
+	response_json = response_json['rankings']
+	
 	for rank_index, rank_dict in enumerate(response_json):
 		this_team = int(rank_dict['team_key'][3:])
+		rankings_sorted.append(this_team)
 		
 		# Search for this team through our Team instances
 		for team_index, team in enumerate(teams):
