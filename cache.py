@@ -98,6 +98,7 @@ def ask_for_official_rankings():
 	logger.info('Status code: {}'.format(r.status_code))
 	if r.status_code == 304:
 		logger.info('No change in rankings since last request')
+		return
 	elif r.status_code != 200:
 		return
 

@@ -1,7 +1,9 @@
-import logging
-import cache
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
+from threading import Thread
+from time import sleep
+import logging
+import cache
 
 app = Flask(__name__)
 
@@ -26,8 +28,15 @@ def teams():
 def team(team_number):
 	return render_template('team.html', title="Team {}".format(team_number), team=cache.get_team_by_number(team_number))
 
+def update_cache():
+	while True:
+		with app.app_context():
+			cache.sort_teams()
+			cache.ask_for_official_rankings()
+			sleep(120)
+
 cache.models.db.create_all(app=app)
 cache.ask_for_teams_at_event()
-cache.sort_teams()
-cache.ask_for_official_rankings()
+cache_update_thread = Thread(target=update_cache)
+cache_update_thread.start()
 app.run(host='0.0.0.0')
