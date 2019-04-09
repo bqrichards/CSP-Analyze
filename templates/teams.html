@@ -1,5 +1,27 @@
 {% extends 'base.html' %}
 
-{% block content %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/teams.css') }}">
+{% endblock %}
 
+{% block content %}
+<div id="search-bar-holder">
+	<input type="text" id="search-bar" placeholder="Search team number..." />
+</div>
+<div class="grid-container">
+	{% if teams|length > 0 %}
+	{% for team in teams %}
+		<div class="grid-item" id="team-item-{{ team.number }}">
+			<a href="{{ url_for('team', team_number=team.number) }}" >
+				<img src="{{ url_for('static', filename='img/robot.png') }}"/>
+				<br />
+				<span class="team-number-span">Team #{{ team.number }}</span>
+			</a>
+		</div>
+	{% endfor %}
+	{% else %}
+		<p>Sorry, the teams list appears to be empty.</p>
+	{% endif %}
+</div>
+<script src="{{ url_for('static', filename='js/teams.js') }}"></script>
 {% endblock %}

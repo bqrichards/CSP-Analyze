@@ -2,6 +2,12 @@
 	width: 33%;
 	float: left;
 	text-align: center;
+	height: 100%;
+}
+
+.leaderboard {
+	height: 100%;
+	overflow-y: scroll;
 }
 
 .leaderboard a {

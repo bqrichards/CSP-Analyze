@@ -20,7 +20,7 @@ def leaderboards():
 
 @app.route('/teams')
 def teams():
-	return render_template('teams.html', title='Teams')
+	return render_template('teams.html', title='Teams', teams=cache.teams)
 
 @app.route('/team/<int:team_number>')
 def team(team_number):
