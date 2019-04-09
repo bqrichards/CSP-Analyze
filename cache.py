@@ -16,8 +16,8 @@ logger.addHandler(handler)
 
 teams = []
 defence_sorted = []
-hatch_sorted = []
 cargo_sorted = []
+hatch_sorted = []
 
 event_code = '2019wila'
 tba_key = 'DzhuOimNqUcdpPEhDhFMoIFltbTNnIAner1f64b3aSSNrDTpZ1ZozPdN263iIV8L'
@@ -113,6 +113,10 @@ def sort_teams():
 	if len(teams) == 0:
 		logger.warning('called sort_teams when 0 teams are present')
 		return
+
+	global defence_sorted
+	global cargo_sorted
+	global hatch_sorted
 	
 	# Query all match reults
 	rows = models.Match.query.all()
@@ -123,7 +127,13 @@ def sort_teams():
 		team.calculate_averages(models.Match.query.filter_by(idTeam=team.number).all())
 
 	# Sort defence
+	teams = sorted(teams, key=lambda team: team.avg_defence_rating, reverse=True)
+	defence_sorted = [team.number for team in teams]
 
 	# Sort cargo
+	teams = sorted(teams, key=lambda team: team.avg_cargo_score, reverse=True)
+	cargo_sorted = [team.number for team in teams]
 
 	# Sort hatch
+	teams = sorted(teams, key=lambda team: team.avg_hatch_score, reverse=True)
+	hatch_sorted = [team.number for team in teams]

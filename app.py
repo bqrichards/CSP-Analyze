@@ -16,7 +16,7 @@ cache.models.db.init_app(app)
 @app.route('/index')
 @app.route('/leaderboards')
 def leaderboards():
-	return render_template('leaderboards.html', title='Leaderboards')
+	return render_template('leaderboards.html', title='Leaderboards', leaderboards={'defence': cache.defence_sorted, 'cargo': cache.cargo_sorted, 'hatch': cache.hatch_sorted})
 
 @app.route('/teams')
 def teams():

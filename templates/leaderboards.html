@@ -1,5 +1,34 @@
 {% extends 'base.html' %}
 
-{% block content %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/leaderboards.css') }}">
+{% endblock %}
 
+{% block content %}
+<div class="leaderboard-container">
+	<h1>Defence</h1>
+	<ol class="leaderboard">
+		{% for team_number in leaderboards['defence'] %}
+		<li>{{ team_number }}</li>
+		{% endfor %}
+	</ol>
+</div>
+
+<div class="leaderboard-container">
+	<h1>Cargo</h1>
+	<ol class="leaderboard">
+		{% for team_number in leaderboards['cargo'] %}
+		<li>{{ team_number }}</li>
+		{% endfor %}
+	</ol>
+</div>
+
+<div class="leaderboard-container">
+	<h1>Hatch</h1>
+	<ol class="leaderboard">
+		{% for team_number in leaderboards['hatch'] %}
+		<li>{{ team_number }}</li>
+		{% endfor %}
+	</ol>
+</div>
 {% endblock %}
