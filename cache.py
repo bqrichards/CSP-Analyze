@@ -22,9 +22,8 @@ cargo_sorted = []
 hatch_sorted = []
 rankings_sorted = []
 
-event_code = '2019wila'
 tba_key = 'DzhuOimNqUcdpPEhDhFMoIFltbTNnIAner1f64b3aSSNrDTpZ1ZozPdN263iIV8L'
-last_asked = {'teams_at_event': None, 'official_rankings': None}
+last_asked = {'teams_at_event': {}, 'official_rankings': None}
 
 
 def get_team_by_number(number):
@@ -34,26 +33,26 @@ def get_team_by_number(number):
     return None
 
 
-def ask_for_teams_at_event():
-    global teams
+def ask_for_teams_at_event(event_code):
     teams_filename = '{}-teams.json'.format(event_code)
 
     # Check if list of teams already exists
     try:
         with open(teams_filename, 'r') as f:
             teams_from_file = json.loads(f.read())
-            teams = [models.Team(tba_dictionary=team_from_file, from_file=True) for team_from_file in teams_from_file]
+            local_teams = [models.Team(tba_dictionary=team, from_file=True) for team in teams_from_file]
             logger.info('Loaded teams from {}'.format(teams_filename))
-            return
+            return local_teams
     except FileNotFoundError:
         logger.info('no previously saved base team info. fetching.')
 
-    endpoint = 'https://www.thebluealliance.com/api/v3/event/{}/teams'.format(event_code)
+    endpoint = 'https://www.thebluealliance.com/api/v3/event/{}/teams/simple'.format(event_code)
     headers = {'X-TBA-Auth-Key': tba_key}
     logger.info('Asking for teams at event from {}'.format(endpoint))
-    if last_asked['teams_at_event'] is not None:
-        logger.info('Using If-Modified-Since: {}'.format(last_asked['teams_at_event']))
-        headers['If-Modified-Since'] = last_asked['teams_at_event']
+    if event_code in last_asked['teams_at_event']:
+        modified_since = last_asked['teams_at_event'][event_code]
+        logger.info('Using If-Modified-Since: {}'.format(modified_since))
+        headers['If-Modified-Since'] = modified_since
 
     r = requests.get(endpoint, headers=headers)
 
@@ -64,22 +63,23 @@ def ask_for_teams_at_event():
         return
 
     response_json = r.json()
-    teams = []
+    local_teams = []
     for team in response_json:
-        team_object = models.Team(tbaDictionary=team)
-        logger.info('Adding team with number {}'.format(team_object.number))
-        teams.append(team_object)
+        team_object = models.Team(tba_dictionary=team)
+        local_teams.append(team_object)
+    logger.info('Added {} teams: {}'.format(len(local_teams), ', '.join([str(team.number) for team in local_teams])))
 
-    last_asked['teams_at_event'] = r.headers['Last-Modified']
-    logger.info('Added {} teams'.format(len(teams)))
+    last_asked['teams_at_event'][event_code] = r.headers['Last-Modified']
 
-    teams_as_dicts = [team.__dict__ for team in teams]
+    teams_as_dicts = [team.__dict__ for team in local_teams]
     teams_filename = '{}-teams.json'.format(event_code)
     with open(teams_filename, 'w') as f:
         f.write(json.dumps(teams_as_dicts))
 
+    return local_teams
 
-def ask_for_official_rankings():
+
+def ask_for_official_rankings(event_code):
     global teams
 
     if len(teams) == 0:
@@ -126,10 +126,8 @@ def ask_for_official_rankings():
     logger.info('Setting last asked for official rankings to {}'.format(last_asked['official_rankings']))
 
 
-''' Query all match scouting results, recalculate averages, and sort '''
-
-
 def sort_teams():
+    """ Query all match scouting results, recalculate averages, and sort """
     global teams
     if len(teams) == 0:
         logger.warning('called sort_teams when 0 teams are present')
