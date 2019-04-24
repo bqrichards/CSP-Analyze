@@ -140,5 +140,13 @@ pip-selfcheck.json
 
 # End of https://www.gitignore.io/api/venv,python
 
+*idea*
+
 # Ignore database files
 *.db
+
+# Ignore unique_ips.txt
+unique_ips.txt
+
+# Ignore {event-code}-teams.json
+*.json
