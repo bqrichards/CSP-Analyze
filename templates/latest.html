@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/latest.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div id="matches-table-container">
+        <table id="matches-table">
+        <tr>
+            <th>Actions</th>
+            {% for header in columns %}
+                <th>{{ header }}</th>
+            {% endfor %}
+        </tr>
+        {% for row in matches %}
+            <tr>
+            <td><a href="{{ url_for('edit', row_id=row[0]) }}"><button>Edit</button></a></td>
+            {% for value in row %}
+                <td>{{ value }}</td>
+            {% endfor %}
+            </tr>
+        {% endfor %}
+        </table>
+    </div>
+{% endblock %}

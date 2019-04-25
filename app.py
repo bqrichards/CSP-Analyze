@@ -3,7 +3,7 @@ from time import sleep
 from datetime import datetime
 import re
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 
 import cache
 
@@ -15,7 +15,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.app_context().push()
 cache.models.db.init_app(app)
 
-event_codes = ['2019carv', '2019gal', '2019hop', '2019new', '2019roe', '2019tur']
+event_codes = ['2019arc']
 unique_ips = []
 
 
@@ -77,6 +77,51 @@ def teams():
 @app.route('/team/<int:team_number>')
 def team(team_number):
     return render_template('team.html', title="Team {}".format(team_number), team=cache.get_team_by_number(team_number))
+
+
+@app.route('/edit/<int:row_id>', methods=['GET', 'POST'])
+def edit(row_id):
+    if request.method == 'POST':
+        # Make changes
+        date_pattern = re.compile('^(\d+)\/(\d+)\/(\d+) (\d+):(\d+):(\d+)$')
+        r = {}
+        for key in request.form:
+            matches = date_pattern.match(request.form[key])
+            if matches is not None:
+                date_str = datetime.strptime(matches[0], '%Y/%m/%d %H:%M:%S')
+                r[key] = date_str
+            elif request.form[key] == 'True':
+                r[key] = True
+            elif request.form[key] == 'False':
+                r[key] = False
+            else:
+                r[key] = request.form[key]
+
+        new_match_object = cache.models.Match(**r)
+        cache.models.db.session.add(new_match_object)
+        cache.models.db.session.commit()
+
+        # Send back to recent
+        return redirect(url_for('latest'))
+
+    column_names = [column.name for column in cache.models.Match.__mapper__.columns]
+    match_obj = cache.models.Match.query.filter_by(id=row_id).first()
+    match = []
+    for column_name in column_names:
+        match.append(getattr(match_obj, column_name))
+    match = zip(column_names, match)
+    return render_template('edit.html', title='Edit', match=match)
+
+
+@app.route('/latest')
+def latest():
+    column_names = [column.name for column in cache.models.Match.__mapper__.columns]
+    queried_matches = cache.models.Match.query.all()[::-1]
+    matches = []
+    for match in queried_matches:
+        matches.append([getattr(match, column_name) for column_name in column_names])
+
+    return render_template('latest.html', title='Latest', columns=column_names, matches=matches)
 
 
 @app.route('/submit', methods=['POST'])
