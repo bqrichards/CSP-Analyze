@@ -83,22 +83,25 @@ def team(team_number):
 def edit(row_id):
     if request.method == 'POST':
         # Make changes
-        date_pattern = re.compile('^(\d+)\/(\d+)\/(\d+) (\d+):(\d+):(\d+)$')
-        r = {}
+        date_pattern = re.compile('^(\d+)-(\d+)-(\d+)$')
+        old_match = cache.models.Match.query.filter_by(id=row_id).first()
         for key in request.form:
             matches = date_pattern.match(request.form[key])
             if matches is not None:
-                date_str = datetime.strptime(matches[0], '%Y/%m/%d %H:%M:%S')
-                r[key] = date_str
-            elif request.form[key] == 'True':
-                r[key] = True
-            elif request.form[key] == 'False':
-                r[key] = False
+                new_date = datetime.strptime(matches[0], '%Y-%m-%d')
+                setattr(old_match, key, new_date)
+            elif request.form[key] in ('True', 'False'):
+                setattr(old_match, key, request.form[key] == 'True')
             else:
-                r[key] = request.form[key]
+                try:
+                    # Insert as integer
+                    int_value = int(request.form[key])
+                    setattr(old_match, key, int_value)
+                except ValueError:
+                    # Insert as original value
+                    setattr(old_match, key, request.form[key])
 
-        new_match_object = cache.models.Match(**r)
-        cache.models.db.session.add(new_match_object)
+        cache.models.db.session.add(old_match)
         cache.models.db.session.commit()
 
         # Send back to recent
