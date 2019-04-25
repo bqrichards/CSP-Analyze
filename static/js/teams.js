@@ -1,6 +1,6 @@
 /**
 * Hide a specific team number's item
-* @param {number} the team number to hide
+* @param number the team number to hide
 */
 function _hide(number) {
 	document.getElementById('team-item-' + number).style.display = 'none';
@@ -8,7 +8,7 @@ function _hide(number) {
 
 /**
 * Show a specific team number's item
-* @param {number} the team number to show
+* @param number the team number to show
 */
 function _show(number) {
 	document.getElementById('team-item-' + number).style.display = 'block';
@@ -26,7 +26,7 @@ function unhideAll() {
 
 /**
 * Hide teams that don't contain these numbers
-* @param {number} the number to filter teams by
+* @param number the number to filter teams by
 */
 function filterByNumber(number) {
 const items = document.getElementsByClassName('grid-item');

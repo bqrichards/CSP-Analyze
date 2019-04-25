@@ -10,11 +10,19 @@ import models
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+stream_handler = logging.StreamHandler(sys.stdout)
+stream_handler.setLevel(logging.INFO)
+file_handler = logging.FileHandler('info.log')
+file_handler.setLevel(logging.INFO)
+error_file_handler = logging.FileHandler('error.log')
+error_file_handler.setLevel(logging.ERROR)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+stream_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+error_file_handler.setFormatter(formatter)
+logger.addHandler(stream_handler)
+logger.addHandler(file_handler)
+logger.addHandler(error_file_handler)
 
 teams = []
 defence_sorted = []
@@ -54,7 +62,12 @@ def ask_for_teams_at_event(event_code):
         logger.info('Using If-Modified-Since: {}'.format(modified_since))
         headers['If-Modified-Since'] = modified_since
 
-    r = requests.get(endpoint, headers=headers)
+    r = None
+    try:
+        r = requests.get(endpoint, headers=headers)
+    except requests.exceptions.ConnectionError as e:
+        logger.error('Connection error while requesting event code {}'.format(event_code))
+        return []
 
     logger.info('Status code: {}'.format(r.status_code))
     if r.status_code == 304:

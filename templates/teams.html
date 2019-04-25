@@ -5,6 +5,18 @@
 {% endblock %}
 
 {% block content %}
+<div id="filter-container">
+    <form id="filter-form" action="{{ url_for('teams') }}" method="post">
+        <label for="hab-climb-select">HAB Climb</label>
+        <select id="hab-climb-select" name="hab-climb-select" form="filter-form">
+            <option>No Preference</option>
+            <option>Level 1</option>
+            <option>Level 2</option>
+            <option>Level 3</option>
+        </select>
+        <input type="submit" value="Filter"/>
+    </form>
+</div>
 <div id="search-bar-holder">
 	<input type="text" id="search-bar" placeholder="Search team number..." />
 </div>
@@ -15,7 +27,15 @@
 			<a href="{{ url_for('team', team_number=team.number) }}" >
 				<img src="{{ url_for('static', filename='img/robot.png') }}"/>
 				<br />
-				<span class="team-number-span">Team #{{ team.number }}</span>
+				<span class="team-number-span">
+                    {% if team.has_been_highlighted %}
+                    ✓
+                    {% endif %}
+                    {% if team.has_been_issued_warning %}
+                    ✗
+                    {% endif %}
+                    Team #{{ team.number }}
+                </span>
 			</a>
 		</div>
 	{% endfor %}

@@ -18,9 +18,21 @@ cache.models.db.init_app(app)
 event_codes = ['2019carv', '2019gal', '2019hop', '2019new', '2019roe', '2019tur']
 unique_ips = []
 
+
+def has_been_on_level(level_number, team):
+    """
+    Checks to see if a team has reached a certain HAB level in any of their matches
+    :param level_number: level HAB level
+    :param team: the team
+    :return: Whether the team has been on this HAB level
+    """
+    for match in team.matches:
+        if match.auto_idStartLevel == level_number or match.tele_idClimbLevel == level_number:
+            return True
+    return False
+
+
 ''' Web Routes '''
-
-
 @app.route('/')
 @app.route('/index')
 @app.route('/leaderboards')
@@ -37,9 +49,29 @@ def leaderboards():
                                          'hatch': cache.hatch_sorted, 'rankings': cache.rankings_sorted})
 
 
-@app.route('/teams')
+@app.route('/teams', methods=['GET', 'POST'])
 def teams():
-    return render_template('teams.html', title='Teams', teams=cache.teams)
+    if request.method == 'GET':
+        return render_template('teams.html', title='Teams', teams=cache.teams)
+
+    # POST - trying to filter
+    if 'hab-climb-select' not in request.form:
+        cache.logger.warning('Submitting POST request without select options in form')
+        return render_template('error.html', title='Error', error_message='POST request could not be handled')
+
+    if request.form['hab-climb-select'] == 'No Preference':
+        cache.logger.info('Attempting to filter with no preference, giving default list')
+        return render_template('teams.html', title='Teams', teams=cache.teams)
+
+    # Filter teams
+    filtered_teams = []
+
+    # Filter by HAB climb
+    at_least_level = int(request.form['hab-climb-select'][-1])
+    cache.logger.info('Filtering robots by HAB level {}'.format(at_least_level))
+    filtered_teams.extend([team for team in cache.teams if has_been_on_level(at_least_level, team)])
+
+    return render_template('teams.html', title='Teams', teams=filtered_teams)
 
 
 @app.route('/team/<int:team_number>')
