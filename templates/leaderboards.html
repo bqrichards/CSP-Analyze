@@ -31,7 +31,13 @@
 			{% for team in leaderboards['cargo'] %}
 			<a href="{{ url_for('team', team_number=team['number']) }}">
                 <li>
-                    {{ team['number'] }}
+                    {% if team['picked'] %}
+                        <del>
+                    {% endif %}
+                        {{ team['number'] }}
+                    {% if team['picked'] %}
+                        </del>
+                    {% endif %}
                 </li>
             </a>
 			{% endfor %}
@@ -44,7 +50,13 @@
 			{% for team in leaderboards['hatch'] %}
 			<a href="{{ url_for('team', team_number=team['number']) }}">
                 <li>
-                    {{ team['number'] }}
+                    {% if team['picked'] %}
+                        <del>
+                    {% endif %}
+                        {{ team['number'] }}
+                    {% if team['picked'] %}
+                        </del>
+                    {% endif %}
                 </li>
             </a>
 			{% endfor %}

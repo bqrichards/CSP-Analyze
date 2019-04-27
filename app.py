@@ -207,7 +207,7 @@ def update_cache():
     while True:
         with app.app_context():
             cache.sort_teams()
-            #cache.ask_for_official_rankings()
+            cache.ask_for_official_rankings(event_codes[0])
             sleep(120)
 
 
@@ -218,4 +218,5 @@ for event_code in event_codes:
 # cache_update_thread = Thread(target=update_cache)
 # cache_update_thread.start()
 cache.sort_teams()
+cache.ask_for_official_rankings(event_codes[0])
 app.run(host='0.0.0.0')
