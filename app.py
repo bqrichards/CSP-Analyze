@@ -54,24 +54,38 @@ def teams():
     if request.method == 'GET':
         return render_template('teams.html', title='Teams', teams=cache.teams)
 
-    # POST - trying to filter
-    if 'hab-climb-select' not in request.form:
-        cache.logger.warning('Submitting POST request without select options in form')
-        return render_template('error.html', title='Error', error_message='POST request could not be handled')
-
-    if request.form['hab-climb-select'] == 'No Preference':
-        cache.logger.info('Attempting to filter with no preference, giving default list')
-        return render_template('teams.html', title='Teams', teams=cache.teams)
-
     # Filter teams
     filtered_teams = []
 
-    # Filter by HAB climb
-    at_least_level = int(request.form['hab-climb-select'][-1])
-    cache.logger.info('Filtering robots by HAB level {}'.format(at_least_level))
-    filtered_teams.extend([team for team in cache.teams if has_been_on_level(at_least_level, team)])
+    only_highlight = request.form.get('highlighted-teams-only') == 'on'
+    only_issue_warning = request.form.get('issued-warning-teams-only') == 'on'
 
-    return render_template('teams.html', title='Teams', teams=filtered_teams)
+    if only_highlight and only_issue_warning:
+        cache.logger.info('Filtering robots by highlighted or warned issue')
+        filtered_teams.extend([team for team in cache.teams if team.has_been_highlighted or team.has_been_issued_warning])
+    elif only_highlight:
+        cache.logger.info('Filtering robots by highlighted only')
+        filtered_teams.extend([team for team in cache.teams if team.has_been_highlighted])
+    elif only_issue_warning:
+        cache.logger.info('Filtering robots by warned issue only')
+        filtered_teams.extend([team for team in cache.teams if team.has_been_issued_warning])
+
+    # POST - trying to filter
+    if request.form['hab-climb-select'] != 'No Preference':
+        at_least_level = int(request.form['hab-climb-select'][-1])
+        cache.logger.info('Filtering robots by HAB level {}'.format(at_least_level))
+
+        if len(filtered_teams) > 0:
+            filtered_teams = [team for team in filtered_teams if has_been_on_level(at_least_level, team)]
+        else:
+            filtered_teams = [team for team in cache.teams if has_been_on_level(at_least_level, team)]
+
+    cache.logger.info(f'Number of filtered teams: {len(filtered_teams)}')
+
+    if len(filtered_teams) == 0:
+        return render_template('teams.html', title='Teams', teams=cache.teams)
+    else:
+        return render_template('teams.html', title='Teams', teams=filtered_teams)
 
 
 @app.route('/team/<int:team_number>')
