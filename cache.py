@@ -159,13 +159,13 @@ def sort_teams():
         team.calculate_averages(models.Match.query.filter_by(idTeam=team.number).all())
 
     # Sort defence
-    defence_sorted = [team.number for team in sorted(teams, key=lambda team: team.avg_defence_rating, reverse=True)]
+    defence_sorted = [{'number': team.number, 'picked': team.alliance_selected} for team in sorted(teams, key=lambda team: team.avg_defence_rating, reverse=True)]
 
     # Sort cargo
-    cargo_sorted = [team.number for team in sorted(teams, key=lambda team: team.avg_cargo_score, reverse=True)]
+    cargo_sorted = [{'number': team.number, 'picked': team.alliance_selected} for team in sorted(teams, key=lambda team: team.avg_cargo_score, reverse=True)]
 
     # Sort hatch
-    hatch_sorted = [team.number for team in sorted(teams, key=lambda team: team.avg_hatch_score, reverse=True)]
+    hatch_sorted = [{'number': team.number, 'picked': team.alliance_selected} for team in sorted(teams, key=lambda team: team.avg_hatch_score, reverse=True)]
 
     # Sort teams array based on team number
     teams = sorted(teams, key=lambda team: team.number)

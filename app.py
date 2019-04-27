@@ -93,6 +93,17 @@ def team(team_number):
     return render_template('team.html', title="Team {}".format(team_number), team=cache.get_team_by_number(team_number))
 
 
+@app.route('/mark/<int:team_number>')
+def mark_as_picked(team_number):
+    for i in range(len(cache.teams)):
+        if cache.teams[i].number == team_number:
+            cache.teams[i].alliance_selected = not cache.teams[i].alliance_selected
+            cache.sort_teams()
+            return 'Thanks!'
+    cache.logger.error('unable to find team {} to mark'.format(team_number))
+    return "Couldn't find that team"
+
+
 @app.route('/edit/<int:row_id>', methods=['GET', 'POST'])
 def edit(row_id):
     if request.method == 'POST':
@@ -204,6 +215,7 @@ cache.models.db.create_all(app=app)
 cache.teams = []
 for event_code in event_codes:
     cache.teams.extend(cache.ask_for_teams_at_event(event_code))
-cache_update_thread = Thread(target=update_cache)
-cache_update_thread.start()
+# cache_update_thread = Thread(target=update_cache)
+# cache_update_thread.start()
+cache.sort_teams()
 app.run(host='0.0.0.0')

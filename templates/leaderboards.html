@@ -9,8 +9,18 @@
 	<div class="leaderboard-container">
 		<h1>Defence</h1>
 		<ol class="leaderboard">
-			{% for team_number in leaderboards['defence'] %}
-			<a href="{{ url_for('team', team_number=team_number) }}"><li>{{ team_number }}</li></a>
+			{% for team in leaderboards['defence'] %}
+			<a href="{{ url_for('team', team_number=team['number']) }}">
+                <li>
+                    {% if team['picked'] %}
+                        <del>
+                    {% endif %}
+                        {{ team['number'] }}
+                    {% if team['picked'] %}
+                        </del>
+                    {% endif %}
+                </li>
+            </a>
 			{% endfor %}
 		</ol>
 	</div>
@@ -18,8 +28,12 @@
 	<div class="leaderboard-container">
 		<h1>Cargo</h1>
 		<ol class="leaderboard">
-			{% for team_number in leaderboards['cargo'] %}
-			<a href="{{ url_for('team', team_number=team_number) }}"><li>{{ team_number }}</li></a>
+			{% for team in leaderboards['cargo'] %}
+			<a href="{{ url_for('team', team_number=team['number']) }}">
+                <li>
+                    {{ team['number'] }}
+                </li>
+            </a>
 			{% endfor %}
 		</ol>
 	</div>
@@ -27,8 +41,12 @@
 	<div class="leaderboard-container">
 		<h1>Hatch</h1>
 		<ol class="leaderboard">
-			{% for team_number in leaderboards['hatch'] %}
-			<a href="{{ url_for('team', team_number=team_number) }}"><li>{{ team_number }}</li></a>
+			{% for team in leaderboards['hatch'] %}
+			<a href="{{ url_for('team', team_number=team['number']) }}">
+                <li>
+                    {{ team['number'] }}
+                </li>
+            </a>
 			{% endfor %}
 		</ol>
 	</div>
@@ -36,15 +54,20 @@
 <div id="bottom-container">
 	<div class="leaderboard-container">
 		<h1>Our Top Picks</h1>
-		<ol class="leaderboard">
+        Work in progress
+		<!--<ol class="leaderboard">
 			
-		</ol>
+		</ol>-->
 	</div>
 	<div class="leaderboard-container">
 		<h1>Official Rankings</h1>
 		<ol class="leaderboard">
 			{% for team_number in leaderboards['rankings'] %}
-			<a href="{{ url_for('team', team_number=team_number) }}"><li>{{ team_number }}</li></a>
+			<a href="{{ url_for('team', team_number=team_number) }}">
+                <li>
+                    {{ team_number }}
+                </li>
+            </a>
 			{% endfor %}
 		</ol>
 	</div>

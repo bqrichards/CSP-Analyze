@@ -21,6 +21,7 @@ class Team(object):
     number = None
     name = None
     matches = []
+    alliance_selected = False
 
     # Averages
     avg_cargo_score = 0.0
