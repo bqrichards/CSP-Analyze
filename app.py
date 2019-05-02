@@ -2,10 +2,9 @@ from threading import Thread
 from time import sleep
 from datetime import datetime
 import re
-
+import cache
 from flask import Flask, render_template, request, redirect, url_for
 
-import cache
 
 app = Flask(__name__)
 
@@ -15,7 +14,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.app_context().push()
 cache.models.db.init_app(app)
 
-event_codes = ['2019arc']
+
+event_code = '2019arc'
 unique_ips = []
 
 
@@ -37,6 +37,10 @@ def has_been_on_level(level_number, team):
 @app.route('/index')
 @app.route('/leaderboards')
 def leaderboards():
+    """
+    Shows the default page
+    :return: leaderboards web page
+    """
     ip = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
     if ip not in unique_ips:
         unique_ips.append(ip)
@@ -51,15 +55,21 @@ def leaderboards():
 
 @app.route('/teams', methods=['GET', 'POST'])
 def teams():
+    """
+    Shows all the teams at the event, with the option to sort by certain features.
+    :return: The team web page
+    """
     if request.method == 'GET':
         return render_template('teams.html', title='Teams', teams=cache.teams)
 
-    # Filter teams
+    # The method is POST, so a filter is trying to happen
     filtered_teams = []
 
+    # See if check boxes are enabled
     only_highlight = request.form.get('highlighted-teams-only') == 'on'
     only_issue_warning = request.form.get('issued-warning-teams-only') == 'on'
 
+    # Sort based on if certain checkboxes are enabled
     if only_highlight and only_issue_warning:
         cache.logger.info('Filtering robots by highlighted or warned issue')
         filtered_teams.extend([team for team in cache.teams if team.has_been_highlighted or team.has_been_issued_warning])
@@ -70,7 +80,7 @@ def teams():
         cache.logger.info('Filtering robots by warned issue only')
         filtered_teams.extend([team for team in cache.teams if team.has_been_issued_warning])
 
-    # POST - trying to filter
+    # Sort based on if HAB climb is required
     if request.form['hab-climb-select'] != 'No Preference':
         at_least_level = int(request.form['hab-climb-select'][-1])
         cache.logger.info('Filtering robots by HAB level {}'.format(at_least_level))
@@ -95,6 +105,12 @@ def team(team_number):
 
 @app.route('/mark/<int:team_number>')
 def mark_as_picked(team_number):
+    """
+    Endpoint to mark a team as "picked" in alliance selection.
+    This will strikeout their name in the sorted sections
+    :param team_number: The neam number to strike out
+    :return: Result of the operation
+    """
     for i in range(len(cache.teams)):
         if cache.teams[i].number == team_number:
             cache.teams[i].alliance_selected = not cache.teams[i].alliance_selected
@@ -143,6 +159,10 @@ def edit(row_id):
 
 @app.route('/latest')
 def latest():
+    """
+    Shows the latest entries into the database. Used to verify information and make changes if necessary.
+    :return: The latest web page
+    """
     column_names = [column.name for column in cache.models.Match.__mapper__.columns]
     queried_matches = cache.models.Match.query.all()[::-1]
     matches = []
@@ -154,6 +174,10 @@ def latest():
 
 @app.route('/submit', methods=['POST'])
 def submit():
+    """
+    Used as an endpoint for CSP Aggregate to submit CSV data to insert into the database
+    :return: The number of items appended to the database.
+    """
     form = request.form
     if form is None:
         return 'no data posted'
@@ -188,6 +212,7 @@ def submit():
             date_str = datetime.strptime(matches[0], '%Y/%m/%d %H:%M:%S')
             split_result[i] = date_str
 
+        # Valid matchscouting result has 76 columns
         if len(split_result) == 76:
             together = {key: value for (key, value) in zip(columns, split_result)}
             del together['id']
@@ -204,19 +229,19 @@ def submit():
 
 
 def update_cache():
+    """
+    Sort the teams and ask for their new rankings.
+    This will run indefinitely, sleeping for two minutes in between sorting and asking.
+    """
     while True:
         with app.app_context():
             cache.sort_teams()
-            cache.ask_for_official_rankings(event_codes[0])
+            cache.ask_for_official_rankings(event_code)
             sleep(120)
 
 
 cache.models.db.create_all(app=app)
-cache.teams = []
-for event_code in event_codes:
-    cache.teams.extend(cache.ask_for_teams_at_event(event_code))
-# cache_update_thread = Thread(target=update_cache)
-# cache_update_thread.start()
-cache.sort_teams()
-cache.ask_for_official_rankings(event_codes[0])
+cache.teams = cache.ask_for_teams_at_event(event_code)
+cache_update_thread = Thread(target=update_cache)
+cache_update_thread.start()
 app.run(host='0.0.0.0')
