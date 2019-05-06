@@ -100,6 +100,11 @@ def teams():
 
 @app.route('/team/<int:team_number>')
 def team(team_number):
+    """
+    Get the web page for a specific team
+    :param team_number:
+    :return:
+    """
     return render_template('team.html', title="Team {}".format(team_number), team=cache.get_team_by_number(team_number))
 
 
@@ -122,6 +127,12 @@ def mark_as_picked(team_number):
 
 @app.route('/edit/<int:row_id>', methods=['GET', 'POST'])
 def edit(row_id):
+    """
+    If route is requested with GET, display the contents of a row in Match db with id row_id.
+    If route is requested with POST, edit the contents of a row in Match db with id row_id.
+    :param row_id:
+    :return: If GET, the values from row row_id. If POST, redirect to 'latest' page.
+    """
     if request.method == 'POST':
         # Make changes
         date_pattern = re.compile('^(\d+)-(\d+)-(\d+)$')

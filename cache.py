@@ -12,18 +12,23 @@ logger.setLevel(logging.INFO)
 
 stream_handler = logging.StreamHandler(sys.stdout)
 stream_handler.setLevel(logging.INFO)
+
 file_handler = logging.FileHandler('info.log')
 file_handler.setLevel(logging.INFO)
+
 error_file_handler = logging.FileHandler('error.log')
 error_file_handler.setLevel(logging.ERROR)
+
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 stream_handler.setFormatter(formatter)
 file_handler.setFormatter(formatter)
 error_file_handler.setFormatter(formatter)
+
 logger.addHandler(stream_handler)
 logger.addHandler(file_handler)
 logger.addHandler(error_file_handler)
 
+# Set up cached lists
 teams = []
 defence_sorted = []
 cargo_sorted = []
@@ -42,6 +47,11 @@ def get_team_by_number(number):
 
 
 def ask_for_teams_at_event(event_code):
+    """
+    Return an list of teams at the event code event_code
+    :param event_code the TBA code of the event
+    :return a list of Team objects
+    """
     teams_filename = '{}-teams.json'.format(event_code)
 
     # Check if list of teams already exists
@@ -93,6 +103,10 @@ def ask_for_teams_at_event(event_code):
 
 
 def ask_for_official_rankings(event_code):
+    """
+    Set rankings_sorted the ordered list of teams ranked at the event code event_code
+    :param event_code the TBA code of the event
+    """
     global teams
 
     if len(teams) == 0:
